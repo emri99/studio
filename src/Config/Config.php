@@ -3,6 +3,7 @@
 namespace Studio\Config;
 
 use Studio\Package;
+use Symfony\Component\Finder\Finder;
 
 class Config
 {
@@ -43,7 +44,28 @@ class Config
         if (!file_exists($this->file)) return [];
 
         $data = $this->readFromFile();
-        return $this->serializer->deserializePaths($data);
+        $paths = $this->serializer->deserializePaths($data);
+
+        return $this->extendPaths($paths);
+    }
+
+    protected function extendPaths($paths)
+    {
+        $extendedPaths = [];
+
+        foreach ($paths as $path)
+        {
+            $finder = (new Finder())
+                ->in($path)
+                ->name('composer.json')
+                ->depth(0);
+
+            $extendedPaths += array_map(function($file) {
+                return dirname($file);
+            }, iterator_to_array($finder, false));
+        }
+
+        return $extendedPaths;
     }
 
     public function getPaths()
