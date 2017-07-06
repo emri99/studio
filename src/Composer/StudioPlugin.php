@@ -107,7 +107,7 @@ class StudioPlugin implements PluginInterface, EventSubscriberInterface
             if (!$this->filesystem->isSymlinkedDirectory($destination) &&
                 !$this->filesystem->isJunction($destination)
             ) {
-                $this->io->write("[Studio] Creating link to $path for package " . $package->getName());
+                $this->io->write("<comment>[Studio]</comment> Creating link to $path for package " . $package->getName());
 
                 // Create copy of original in the `.studio` directory,
                 // we use the original on the next `composer update`
@@ -158,7 +158,7 @@ class StudioPlugin implements PluginInterface, EventSubscriberInterface
             if ($this->filesystem->isSymlinkedDirectory($destination) ||
                 $this->filesystem->isJunction($destination)
             ) {
-                $this->io->write("[Studio] Removing linked path $path for package " . $package->getName());
+                $this->io->write("<comment>[Studio]</comment> Removing linked path $path for package " . $package->getName());
                 $this->filesystem->removeDirectory($destination);
 
                 // If we have an original copy move it back
@@ -203,7 +203,16 @@ class StudioPlugin implements PluginInterface, EventSubscriberInterface
         $targetDir = realpath($this->rootPackage->getTargetDir());
         $config = Config::make($targetDir . DIRECTORY_SEPARATOR  . 'studio.json');
 
-        return $config->getPaths();
+        $paths = $config->getPaths();
+
+        if ($this->io->isVerbose()) {
+            $list = count($paths)
+                ? "\n". implode("\n", array_map(function($p) { return '<comment>[Studio]</comment>  * '.$p;}, $paths))
+                : 'none';
+            $this->io->writeError(sprintf('<comment>[Studio]</comment> Managed paths: %s', $list));
+        }
+
+        return $paths;
     }
 
     /**
