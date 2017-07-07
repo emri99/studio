@@ -121,7 +121,10 @@ class StudioPluginSpec extends ObjectBehavior
             ->willReturn($pathDownloader)
             ->shouldBeCalled();
 
-        $io->write('[Studio] Creating link to library for package acme/library')->shouldBeCalled();
+        $io->write("<comment>[Studio]</comment> Creating link to components/one for package acme/components-one")->shouldBeCalled();
+        $io->write("<comment>[Studio]</comment> Creating link to components/two for package acme/components-two")->shouldBeCalled();
+
+        $io->isVerbose()->shouldBeCalled();
 
         // Test
         $this->activate($composer, $io);
@@ -162,7 +165,8 @@ class StudioPluginSpec extends ObjectBehavior
         $filesystem->isSymlinkedDirectory(null)->willReturn(true)->shouldBeCalled();
         $filesystem->removeDirectory(null)->shouldBeCalled();
 
-        $io->write('[Studio] Removing linked path library for package acme/library')->shouldBeCalled();
+        $io->write('<comment>[Studio]</comment> Removing linked path library for package acme/library')->shouldBeCalledTimes(1);
+        $io->isVerbose()->shouldBeCalled();
 
         // Test
         $this->activate($composer, $io);
